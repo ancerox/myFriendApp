@@ -41,7 +41,7 @@ void main() {
       await tester.tap(reguisterButton);
       await tester.ensureVisible(reguisterButton);
       await tester.pumpAndSettle(
-        Duration(milliseconds: 100),
+        const Duration(milliseconds: 100),
       );
 
       // expected result

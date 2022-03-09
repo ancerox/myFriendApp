@@ -1,19 +1,21 @@
 import 'package:flutter/material.dart';
-import 'package:my_friend/src/config/screen_size.dart';
+import 'package:my_friend/src/config/utils/screen_size.dart';
 
 class CustomImput extends StatelessWidget {
   final TextEditingController textEditingController;
   final String hintText;
   final Icon prefixIcon;
   final bool obscureText;
+  final Function(String)? onChanged;
 
-  const CustomImput({
-    Key? key,
-    required this.obscureText,
-    required this.textEditingController,
-    required this.hintText,
-    required this.prefixIcon,
-  }) : super(key: key);
+  const CustomImput(
+      {Key? key,
+      required this.obscureText,
+      required this.textEditingController,
+      required this.hintText,
+      required this.prefixIcon,
+      this.onChanged})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -37,6 +39,7 @@ class CustomImput extends StatelessWidget {
           ]),
       child: Center(
         child: TextField(
+          onChanged: onChanged,
           obscureText: obscureText,
           textAlign: TextAlign.left,
           controller: textEditingController,
