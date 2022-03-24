@@ -43,18 +43,21 @@ class _MessagePageState extends State<MessagePage>
     );
 
     loadHistory(authProvider.friend!.uid);
+    _controller.forward();
   }
 
   loadHistory(String userId) async {
     List<Message> messages = await messageProvider.getMessages(userId);
 
-    final history = messages.map((e) => BubbleMessage(
-          message: e.message,
-          animationController: _controller,
-          uid: e.of,
-        ));
+    final history = messages
+        .map((e) => BubbleMessage(
+              message: e.message,
+              animationController: _controller,
+              uid: e.of,
+            ))
+        .toList();
     setState(() {
-      userMessages.insertAll(0, history);
+      userMessages = history;
     });
   }
 

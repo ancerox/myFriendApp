@@ -46,11 +46,11 @@ class _HomePageState extends State<HomePage> {
         ],
       ),
       body: userListView(socketprovider),
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: Colors.purple[200],
-        child: const Icon(Icons.add),
-        onPressed: () {},
-      ),
+      // floatingActionButton: FloatingActionButton(
+      //   backgroundColor: Colors.purple[200],
+      //   child: const Icon(Icons.add),
+      //   onPressed: () {},
+      // ),
     );
   }
 

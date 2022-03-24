@@ -22,7 +22,7 @@ class BubbleMessage extends StatelessWidget {
   }
 
   Widget _myMessage(context) {
-    final authProvider = Provider.of<AuthProvider>(context);
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
 
     return FadeTransition(
       opacity: animationController,
@@ -45,15 +45,17 @@ class BubbleMessage extends StatelessWidget {
                     : 20,
               ),
               decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  begin: Alignment.topRight,
-                  end: Alignment.bottomLeft,
-                  colors: [
-                    Color(0xffff512f),
-                    Color(0xffdd2476),
-                  ],
-                ),
-                color: Colors.red,
+                gradient: uid == authProvider.user!.uid
+                    ? const LinearGradient(
+                        begin: Alignment.topRight,
+                        end: Alignment.bottomLeft,
+                        colors: [
+                          Color(0xffff512f),
+                          Color(0xffdd2476),
+                        ],
+                      )
+                    : null,
+                color: uid == authProvider.user!.uid ? Colors.red : Colors.grey,
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Text(
