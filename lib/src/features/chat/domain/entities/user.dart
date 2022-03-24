@@ -11,29 +11,15 @@ class User extends Equatable {
     required this.name,
     required this.email,
     required this.uid,
+    required this.online,
   });
 
   final String name;
   final String email;
   final String uid;
-
-  factory User.fromJson(String str) => User.fromMap(json.decode(str));
-
-  String toJson() => json.encode(toMap());
-
-  factory User.fromMap(Map<String, dynamic> json) => User(
-        name: json["name"],
-        email: json["email"],
-        uid: json["uid"],
-      );
-
-  Map<String, dynamic> toMap() => {
-        "name": name,
-        "email": email,
-        "uid": uid,
-      };
+  final bool online;
 
   @override
   // TODO: implement props
-  List<Object?> get props => [name, email, uid];
+  List<Object?> get props => [name, email, uid, online];
 }

@@ -1,11 +1,30 @@
+import 'dart:convert';
+
+import 'package:dartz/dartz.dart';
+import 'package:dio/dio.dart';
+
 import 'package:flutter/widgets.dart';
-import 'package:provider/provider.dart';
+import 'package:my_friend/src/config/error/failure.dart';
+import 'package:my_friend/src/config/helpers/save_token.dart';
+import 'package:my_friend/src/config/usecase/usecase.dart';
+import 'package:my_friend/src/features/chat/domain/entities/login.dart';
+import 'package:my_friend/src/features/chat/domain/entities/user.dart';
+import 'package:my_friend/src/features/chat/domain/usecase/login_usecase.dart';
+import 'package:my_friend/src/features/chat/domain/usecase/token_verification_usecase.dart';
 
 class AuthProvider extends ChangeNotifier {
+  User? friend;
+  bool isAuthing = false;
+  User? user;
   String name = '';
   String mail = '';
   String pass = '';
   List<String> errorList = [];
+  final LoginUseCase loginUseCase;
+  final TokenVerification tokenVerificationUsecase;
+
+  AuthProvider(
+      {required this.loginUseCase, required this.tokenVerificationUsecase});
 
   void validator() {
     notifyListeners();
@@ -21,20 +40,16 @@ class AuthProvider extends ChangeNotifier {
 
     if (errorList.contains(errorName)) return;
 
-    if (name.isEmpty) {
-      errorList.add(errorName);
-    }
-
     // Name validator
-    //
+
     // PassWord Validator
-    if (pass.length >= 8) {
+    if (pass.length >= 6) {
       errorList.remove(passWordError);
     }
 
     if (errorList.contains(passWordError)) return;
 
-    if (pass.length < 8) {
+    if (pass.length < 6) {
       errorList.add(passWordError);
     }
     // PassWord Validator
@@ -53,9 +68,34 @@ class AuthProvider extends ChangeNotifier {
       errorList.add(mailError);
     }
     // Email Validator
+  }
 
-    if (errorList.isEmpty) {
-      print('do this');
-    }
+  Future<bool> login({required email, required password}) async {
+    isAuthing = true;
+    Either<Failure, User> result = await loginUseCase.call(
+      Params(
+        login: LoginResponse(email: email, password: password),
+      ),
+    );
+
+    return result.fold((l) => false, (user) {
+      this.user = user;
+      isAuthing = false;
+      return true;
+    });
+  }
+
+  Future tokenVerification() async {
+    Either<Failure, User> result =
+        await tokenVerificationUsecase.call(NoParams());
+
+    return result.fold((l) => false, (user) {
+      this.user = user;
+      return true;
+    });
+  }
+
+  logUserOut() async {
+    deleteToken();
   }
 }

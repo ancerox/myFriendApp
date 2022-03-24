@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
-import 'package:my_friend/src/config/utils/screen_size.dart';
+import 'package:my_friend/src/config/helpers/alerts.dart';
+import 'package:my_friend/src/config/utils/socket_conection.dart';
 
 import 'package:my_friend/src/features/chat/presentation/components/auth_image.dart';
 
 import 'package:my_friend/src/features/chat/presentation/components/componets.dart';
-import 'package:my_friend/src/features/chat/presentation/components/errors_widget.dart';
 import 'package:my_friend/src/features/chat/presentation/provider/providers.dart';
+
 import 'package:provider/provider.dart';
 
 class LoginPage extends StatefulWidget {
@@ -23,6 +23,11 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     final authProvider = Provider.of<AuthProvider>(context);
+    final socketProvider = Provider.of<SocketService>(context);
+
+    // if (emailTextcontroller.text.isNotEmpty) {
+    //   authProvider.validator();
+    // }
 
     return Scaffold(
       backgroundColor: const Color(0xffF2F2F2),
@@ -69,10 +74,28 @@ class _LoginPageState extends State<LoginPage> {
                 height: 15.0,
               ),
               CustomBtn(
-                onPressed:
-                    authProvider.pass.isNotEmpty && authProvider.mail.isNotEmpty
-                        ? authProvider.validator
-                        : null,
+                onPressed: authProvider.pass.isNotEmpty &&
+                        authProvider.mail.isNotEmpty
+                    ? () async {
+                        authProvider.validator();
+                        if (authProvider.errorList.isEmpty) {
+                          final isAtuh = await authProvider.login(
+                              email: authProvider.mail,
+                              password: authProvider.pass);
+
+                          if (isAtuh) {
+                            authProvider.mail = '';
+                            authProvider.pass = '';
+
+                            socketProvider.connect();
+                            Navigator.pushReplacementNamed(context, '/home');
+                          } else {
+                            showCustomAlert(context, 'Wrong email or password',
+                                'duble check');
+                          }
+                        }
+                      }
+                    : null,
                 text: 'Log In',
               ),
               const SizedBox(
@@ -84,7 +107,9 @@ class _LoginPageState extends State<LoginPage> {
                   const Text("You don't have an acount yet?"),
                   const SizedBox(width: 10),
                   TextButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      Navigator.pushNamed(context, '/register');
+                    },
                     child: const Text('Register',
                         style: TextStyle(fontWeight: FontWeight.bold)),
                   ),

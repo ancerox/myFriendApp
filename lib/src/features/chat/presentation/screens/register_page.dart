@@ -42,9 +42,11 @@ class _RegisterPageState extends State<RegisterPage> {
                 height: SizeConfig.heightSize(context, 5.0),
               ),
               CustomImput(
-                onChanged: (name) {
-                  setState(() => authProvider.name = name);
-                },
+                onChanged: authProvider.name.isNotEmpty == true
+                    ? (name) {
+                        setState(() => authProvider.name = name);
+                      }
+                    : null,
                 obscureText: false,
                 prefixIcon: const Icon(Icons.person),
                 hintText: 'Name',
@@ -100,7 +102,9 @@ class _RegisterPageState extends State<RegisterPage> {
                   const Text("You already have an acount?"),
                   const SizedBox(width: 10),
                   TextButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      Navigator.pushReplacementNamed(context, '/login');
+                    },
                     child: const Text("Log In",
                         style: TextStyle(fontWeight: FontWeight.bold)),
                   ),

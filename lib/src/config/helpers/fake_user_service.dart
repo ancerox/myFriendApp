@@ -8,6 +8,7 @@ class FakeUserService {
             email: 'fakeEmail@outlook.es',
             name: 'fakeName',
             uid: 'fake123',
+            online: true,
           ));
 
   Future<List<User>> getUsers() async {

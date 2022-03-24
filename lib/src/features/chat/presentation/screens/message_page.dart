@@ -1,7 +1,13 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:my_friend/src/config/utils/socket_conection.dart';
+import 'package:my_friend/src/features/chat/domain/entities/message.dart';
+import 'package:my_friend/src/features/chat/domain/entities/user.dart';
 import 'package:my_friend/src/features/chat/presentation/components/componets.dart';
+import 'package:my_friend/src/features/chat/presentation/provider/auth_provider.dart';
+import 'package:my_friend/src/features/chat/presentation/provider/message_provider.dart';
+import 'package:provider/provider.dart';
 
 class MessagePage extends StatefulWidget {
   const MessagePage({Key? key}) : super(key: key);
@@ -10,34 +16,77 @@ class MessagePage extends StatefulWidget {
   State<MessagePage> createState() => _MessagePageState();
 }
 
-List<BubbleMessage> userMessages = [
-  // BubbleMessage(message: 'Como estas', uid: '123'),
-  // BubbleMessage(message: 'hey', uid: '123'),
-  // BubbleMessage(message: 'Para donde vas', uid: '1223'),
-  // BubbleMessage(message: 'Hoy no voy a ', uid: '123'),
-  // BubbleMessage(message: 'ah tato', uid: '1223'),
-];
+List<BubbleMessage> userMessages = [];
 
 class _MessagePageState extends State<MessagePage>
     with TickerProviderStateMixin {
+  late AuthProvider authProvider;
+  late MessageProvider messageProvider;
+
+  late SocketService socketService;
+  late AnimationController _controller;
+
   final _textEdittindCtrl = TextEditingController();
 
   final _focusNode = FocusNode();
+  @override
+  void initState() {
+    super.initState();
+
+    socketService = Provider.of<SocketService>(context, listen: false);
+    authProvider = Provider.of<AuthProvider>(context, listen: false);
+    messageProvider = Provider.of<MessageProvider>(context, listen: false);
+    socketService.socket.on('direct-message', listenMessages);
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 300),
+    );
+
+    loadHistory(authProvider.friend!.uid);
+  }
+
+  loadHistory(String userId) async {
+    List<Message> messages = await messageProvider.getMessages(userId);
+
+    final history = messages.map((e) => BubbleMessage(
+          message: e.message,
+          animationController: _controller,
+          uid: e.of,
+        ));
+    setState(() {
+      userMessages.insertAll(0, history);
+    });
+  }
+
+  listenMessages(payload) {
+    final message = BubbleMessage(
+      message: payload['message'],
+      uid: payload['of'],
+      animationController: _controller,
+    );
+    setState(() {
+      userMessages.insert(0, message);
+    });
+    message.animationController.forward();
+  }
 
   @override
   Widget build(BuildContext context) {
+    final friend = Provider.of<AuthProvider>(context).friend!;
     return Scaffold(
         appBar: AppBar(
           leading: IconButton(
-              onPressed: () {},
+              onPressed: () {
+                Navigator.pop(context);
+              },
               icon: const Icon(Icons.arrow_back, color: Colors.black)),
           elevation: 0,
           backgroundColor: Colors.white,
           title: Column(
             children: [
-              const TextHomePage(text: 'name', fontSize: 25),
+              TextHomePage(text: friend.name, fontSize: 25),
               Text(
-                'offline',
+                friend.online ? 'Online' : 'Offline',
                 style: TextStyle(color: Colors.grey[400], fontSize: 15),
               ),
             ],
@@ -125,13 +174,26 @@ class _MessagePageState extends State<MessagePage>
 
     final message = BubbleMessage(
       message: text,
-      uid: '123',
-      animationController: AnimationController(
-          vsync: this, duration: const Duration(milliseconds: 300)),
+      uid: authProvider.user!.uid,
+      animationController: _controller,
     );
+
+    socketService.emit('direct-message', {
+      "of": authProvider.user!.uid,
+      "to": authProvider.friend!.uid,
+      "message": text
+    });
+
     userMessages.insert(0, message);
     message.animationController.forward();
 
     _textEdittindCtrl.clear();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    socketService.socket.off('direct-message');
+    super.dispose();
   }
 }

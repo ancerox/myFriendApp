@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:my_friend/src/config/utils/screen_size.dart';
+import 'package:my_friend/src/features/chat/presentation/provider/auth_provider.dart';
+import 'package:provider/provider.dart';
 
 class BubbleMessage extends StatelessWidget {
   final String message;
@@ -20,20 +22,27 @@ class BubbleMessage extends StatelessWidget {
   }
 
   Widget _myMessage(context) {
+    final authProvider = Provider.of<AuthProvider>(context);
+
     return FadeTransition(
       opacity: animationController,
       child: SizeTransition(
         sizeFactor:
             CurvedAnimation(parent: animationController, curve: Curves.easeOut),
         child: Align(
-            alignment:
-                uid == '123' ? Alignment.centerRight : Alignment.centerLeft,
+            alignment: uid == authProvider.user!.uid
+                ? Alignment.centerRight
+                : Alignment.centerLeft,
             child: Container(
               padding: const EdgeInsets.all(11),
               margin: EdgeInsets.only(
-                right: uid == '123' ? 10 : SizeConfig.widthSize(context, 20),
+                right: uid == authProvider.user!.uid
+                    ? 10
+                    : SizeConfig.widthSize(context, 20),
                 bottom: 10,
-                left: uid == '123' ? SizeConfig.widthSize(context, 29) : 20,
+                left: uid == authProvider.user!.uid
+                    ? SizeConfig.widthSize(context, 29)
+                    : 20,
               ),
               decoration: BoxDecoration(
                 gradient: const LinearGradient(
