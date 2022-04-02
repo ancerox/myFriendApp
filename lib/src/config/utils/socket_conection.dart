@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:my_friend/src/config/helpers/save_token.dart';
 import 'package:my_friend/src/config/utils/constants.dart';
@@ -12,9 +14,14 @@ enum ServerStatus { online, offline, connecting }
 class SocketService with ChangeNotifier {
   ServerStatus _serverStatus = ServerStatus.connecting;
   late IO.Socket _socket;
-  List friendsList = [];
+  // List friendsList = [];
 
   ServerStatus get serverStatus => _serverStatus;
+
+  final _socketResponse = StreamController<List>.broadcast();
+  void Function(List) get addResponse => _socketResponse.sink.add;
+
+  Stream<List> get getResponse => _socketResponse.stream;
 
   IO.Socket get socket => _socket;
   Function get emit => _socket.emit;
@@ -23,7 +30,7 @@ class SocketService with ChangeNotifier {
     final token = await getToken();
 
     // Dart client
-    _socket = IO.io('${Environment.socketUrl}', {
+    _socket = IO.io('https://my-friend-ancerox.herokuapp.com/', {
       'transports': ['websocket'],
       'autoConnect': true,
       'forceNew': true,
@@ -42,17 +49,19 @@ class SocketService with ChangeNotifier {
     });
 
     _socket.on('friends', (payload) {
-      friendsList = payload.map((data) {
+      List friendsList = payload.map((data) {
         return UserResponse.fromJson(data);
       }).toList();
-      // print(friends);
-      // friendsList = friends;
+
+      addResponse(friendsList);
 
       notifyListeners();
     });
   }
 
   void disconnect() {
+    // _socketResponse.close();
+
     _socket.disconnect();
   }
 }

@@ -7,6 +7,8 @@ import 'package:my_friend/src/features/chat/presentation/provider/message_provid
 import 'package:provider/provider.dart';
 
 import 'src/config/helpers/route_generator.dart';
+import 'src/features/chat/domain/usecase/delete_friend.dart';
+import 'src/features/chat/domain/usecase/get_new_user.dart';
 import 'src/features/chat/domain/usecase/login_usecase.dart';
 import 'src/features/chat/presentation/provider/providers.dart';
 
@@ -24,6 +26,8 @@ class MyApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(
             create: (_) => AuthProvider(
+                deleteFriendUseCase: locator<DeleteFriend>(),
+                newUserUseCase: locator<GetNewUser>(),
                 loginUseCase: locator<LoginUseCase>(),
                 tokenVerificationUsecase: locator<TokenVerification>())),
         ChangeNotifierProvider(create: (_) => SocketService()),

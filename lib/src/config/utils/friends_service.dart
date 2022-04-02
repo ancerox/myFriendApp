@@ -7,21 +7,24 @@ import 'package:my_friend/src/features/chat/data/model/login_model.dart';
 import 'package:my_friend/src/features/chat/domain/entities/user.dart';
 
 class FriendsService {
-  Future<List<User>> getFriends() async {
+  static Future<bool> addFriend(String friendId) async {
     final _dio = Dio();
 
     // List<User> friends = [];
 
     final response = await _dio.get(
-      '${Environment.apiUrl}/friends',
+      'https://my-friend-ancerox.herokuapp.com/api/addfriend$friendId',
       options: Options(
         headers: {'x-token': await getToken()},
       ),
     );
 
-    final friendResponse = FriendsResponse.fromMap(response.data);
-
-    return friendResponse.users;
+    print(response);
+    if (response.data['ok'] == true) {
+      return true;
+    } else {
+      return false;
+    }
   }
 }
 

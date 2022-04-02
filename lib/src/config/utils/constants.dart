@@ -11,10 +11,10 @@ const kErrorColor = Color(0xFFF03738);
 const kDefaultPadding = 20.0;
 
 class Environment {
-  static String apiUrl = Platform.isAndroid
-      ? 'https://my-friend-ancerox.herokuapp.com/api'
-      : 'https://my-friend-ancerox.herokuapp.com/api';
-  static String socketUrl = Platform.isAndroid
-      ? 'https://my-friend-ancerox.herokuapp.com'
-      : 'https://my-friend-ancerox.herokuapp.com';
+  // static String apiUrl = Platform.isAndroid
+  //     ? 'https://my-friend-ancerox.herokuapp.com/api'
+  //     : 'https://my-friend-ancerox.herokuapp.com/api';
+  // static String socketUrl = Platform.isAndroid
+  //     ? 'https://my-friend-ancerox.herokuapp.com'
+  //     : 'https://my-friend-ancerox.herokuapp.com';
 }

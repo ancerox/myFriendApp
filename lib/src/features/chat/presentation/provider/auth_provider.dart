@@ -1,7 +1,4 @@
-import 'dart:convert';
-
 import 'package:dartz/dartz.dart';
-import 'package:dio/dio.dart';
 
 import 'package:flutter/widgets.dart';
 import 'package:my_friend/src/config/error/failure.dart';
@@ -9,10 +6,13 @@ import 'package:my_friend/src/config/helpers/save_token.dart';
 import 'package:my_friend/src/config/usecase/usecase.dart';
 import 'package:my_friend/src/features/chat/domain/entities/login.dart';
 import 'package:my_friend/src/features/chat/domain/entities/user.dart';
+import 'package:my_friend/src/features/chat/domain/usecase/delete_friend.dart';
+import 'package:my_friend/src/features/chat/domain/usecase/get_new_user.dart';
 import 'package:my_friend/src/features/chat/domain/usecase/login_usecase.dart';
 import 'package:my_friend/src/features/chat/domain/usecase/token_verification_usecase.dart';
 
 class AuthProvider extends ChangeNotifier {
+  bool? isUserAgreeWithTerms = false;
   User? friend;
   bool isAuthing = false;
   User? user;
@@ -22,9 +22,14 @@ class AuthProvider extends ChangeNotifier {
   List<String> errorList = [];
   final LoginUseCase loginUseCase;
   final TokenVerification tokenVerificationUsecase;
+  final GetNewUser newUserUseCase;
+  final DeleteFriend deleteFriendUseCase;
 
   AuthProvider(
-      {required this.loginUseCase, required this.tokenVerificationUsecase});
+      {required this.loginUseCase,
+      required this.tokenVerificationUsecase,
+      required this.newUserUseCase,
+      required this.deleteFriendUseCase});
 
   void validator() {
     notifyListeners();
@@ -93,6 +98,24 @@ class AuthProvider extends ChangeNotifier {
       this.user = user;
       return true;
     });
+  }
+
+  Future newUser() async {
+    final newUserCreds = NewUserParams(email: mail, password: pass, name: name);
+
+    Either<Failure, User> result = await newUserUseCase.call(newUserCreds);
+    return result.fold((l) {
+      return false;
+    }, (newUser) {
+      user = newUser;
+      return true;
+    });
+  }
+
+  Future deleteFriend(String uid) async {
+    Either<Failure, bool> result = await deleteFriendUseCase.call(uid);
+
+    return result.fold((l) => false, (r) => true);
   }
 
   logUserOut() async {

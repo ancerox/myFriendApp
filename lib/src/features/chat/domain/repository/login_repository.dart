@@ -8,4 +8,6 @@ abstract class ChatRepository {
   Future<Either<Failure, User>> login(LoginResponse login);
   Future<Either<Failure, User>> tokenVerification();
   Future<Either<Failure, List<Message>>> getMessages(String userId);
+  Future<Either<Failure, User>> getNewUser(creds);
+  Future<Either<Failure, bool>> deleteFriend(String uid);
 }

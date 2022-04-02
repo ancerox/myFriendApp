@@ -1,10 +1,15 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+
+import 'package:my_friend/src/config/helpers/alerts.dart';
 import 'package:my_friend/src/config/utils/screen_size.dart';
+import 'package:my_friend/src/config/utils/socket_conection.dart';
 import 'package:my_friend/src/features/chat/presentation/components/auth_image.dart';
 
 import 'package:my_friend/src/features/chat/presentation/components/componets.dart';
 import 'package:my_friend/src/features/chat/presentation/provider/providers.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class RegisterPage extends StatefulWidget {
   RegisterPage({Key? key}) : super(key: key);
@@ -23,6 +28,7 @@ class _RegisterPageState extends State<RegisterPage> {
   @override
   Widget build(BuildContext context) {
     final authProvider = Provider.of<AuthProvider>(context);
+    final socketProvider = Provider.of<SocketService>(context);
 
     return Scaffold(
       backgroundColor: const Color(0xffF2F2F2),
@@ -42,11 +48,9 @@ class _RegisterPageState extends State<RegisterPage> {
                 height: SizeConfig.heightSize(context, 5.0),
               ),
               CustomImput(
-                onChanged: authProvider.name.isNotEmpty == true
-                    ? (name) {
-                        setState(() => authProvider.name = name);
-                      }
-                    : null,
+                onChanged: (name) {
+                  setState(() => authProvider.name = name);
+                },
                 obscureText: false,
                 prefixIcon: const Icon(Icons.person),
                 hintText: 'Name',
@@ -86,14 +90,56 @@ class _RegisterPageState extends State<RegisterPage> {
                 authProvider.errorList.length,
                 (index) => Errors(text: authProvider.errorList[index]),
               ),
-              SizedBox(
-                height: SizeConfig.heightSize(context, 2.0),
-              ),
+              Container(
+                  child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Checkbox(
+                    value: authProvider.isUserAgreeWithTerms,
+                    onChanged: (value) {
+                      setState(() {
+                        authProvider.isUserAgreeWithTerms = value;
+                      });
+                    },
+                  ),
+                  RichText(
+                      text: TextSpan(children: [
+                    TextSpan(
+                        style: TextStyle(color: Colors.black),
+                        text: 'By creating this account i agree EULA terms \n'),
+                    TextSpan(
+                        text: 'Read about EULA terms here',
+                        style: const TextStyle(color: Colors.blue),
+                        recognizer: TapGestureRecognizer()
+                          ..onTap = () {
+                            launch(
+                                'https://github.com/ancerox/EULA-AGREEMENT-MyFriend/blob/main/LICENSE.md');
+                          })
+                  ])),
+                ],
+              )),
               CustomBtn(
-                onPressed:
-                    authProvider.pass.isNotEmpty && authProvider.mail.isNotEmpty
-                        ? authProvider.validator
-                        : null,
+                onPressed: authProvider.pass.isNotEmpty &&
+                        authProvider.mail.isNotEmpty &&
+                        authProvider.name.isNotEmpty &&
+                        authProvider.isUserAgreeWithTerms == true
+                    ? () async {
+                        authProvider.validator();
+                        if (authProvider.errorList.isEmpty) {
+                          final user = await authProvider.newUser();
+
+                          if (user) {
+                            authProvider.mail = '';
+                            authProvider.pass = '';
+                            socketProvider.connect();
+                            Navigator.pushReplacementNamed(context, '/home');
+                          } else {
+                            showCustomAlert(context, 'Server error',
+                                'This email may be in use');
+                          }
+                        }
+                      }
+                    : null,
                 text: 'Register',
               ),
               Row(

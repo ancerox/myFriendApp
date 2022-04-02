@@ -56,6 +56,7 @@ class _MessagePageState extends State<MessagePage>
               uid: e.of,
             ))
         .toList();
+
     setState(() {
       userMessages = history;
     });
@@ -195,7 +196,7 @@ class _MessagePageState extends State<MessagePage>
 
   @override
   void dispose() {
-    _controller.dispose();
+    // _controller.dispose();//
     socketService.socket.off('direct-message');
     super.dispose();
   }

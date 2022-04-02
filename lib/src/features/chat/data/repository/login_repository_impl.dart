@@ -45,4 +45,24 @@ class AuthRepositoryIMPL extends ChatRepository {
       return Left(ServerFailure());
     }
   }
+
+  @override
+  Future<Either<Failure, User>> getNewUser(creds) async {
+    try {
+      User newUser = await authRemoteDataSource.getNewUser(creds);
+      return Right(newUser);
+    } catch (e) {
+      return Left(ServerFailure());
+    }
+  }
+
+  @override
+  Future<Either<Failure, bool>> deleteFriend(String uid) async {
+    try {
+      bool resp = await authRemoteDataSource.deleteFriend(uid);
+      return Right(resp);
+    } catch (e) {
+      return Left(ServerFailure());
+    }
+  }
 }
