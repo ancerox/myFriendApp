@@ -8,14 +8,15 @@ import 'package:my_friend/src/features/chat/presentation/provider/auth_provider.
 import 'package:my_friend/src/features/chat/presentation/provider/message_provider.dart';
 import 'package:provider/provider.dart';
 
-class MessagePage extends StatefulWidget {
-  const MessagePage({Key? key}) : super(key: key);
+class ContactUsPage extends StatefulWidget {
+  const ContactUsPage({Key? key}) : super(key: key);
 
   @override
-  State<MessagePage> createState() => _MessagePageState();
+  State<ContactUsPage> createState() => _ContactUsPageState();
 }
 
-class _MessagePageState extends State<MessagePage> {
+class _ContactUsPageState extends State<ContactUsPage>
+    with TickerProviderStateMixin {
   late AuthProvider authProvider;
   late MessageProvider messageProvider;
 
@@ -32,7 +33,7 @@ class _MessagePageState extends State<MessagePage> {
     authProvider = Provider.of<AuthProvider>(context, listen: false);
     messageProvider = Provider.of<MessageProvider>(context, listen: false);
     socketService.socket.on('direct-message', listenMessages);
-    loadHistory(authProvider.friend!.uid);
+    loadHistory('624cec81714ee6200250e87c');
   }
 
   callBack() {
@@ -69,27 +70,19 @@ class _MessagePageState extends State<MessagePage> {
 
   @override
   Widget build(BuildContext context) {
-    final friend = Provider.of<AuthProvider>(context, listen: true).friend!;
-    // print(friend);
-
+    // final friend = Provider.of<AuthProvider>(context).friend!;
     return Scaffold(
-        backgroundColor: Colors.grey[200],
         appBar: AppBar(
           leading: IconButton(
               onPressed: () {
                 Navigator.pop(context);
-                messageProvider.userMessages.clear();
               },
               icon: const Icon(Icons.arrow_back, color: Colors.black)),
           elevation: 0,
           backgroundColor: Colors.white,
           title: Column(
             children: [
-              TextHomePage(text: friend.name, fontSize: 25),
-              Text(
-                friend.online ? 'Online' : 'Offline',
-                style: TextStyle(color: Colors.grey[400], fontSize: 15),
-              ),
+              TextHomePage(text: "MyFriend Contact", fontSize: 25),
             ],
           ),
         ),
@@ -107,17 +100,11 @@ class _MessagePageState extends State<MessagePage> {
                 return messageProvider.userMessages[i];
               }),
         ),
-        // const Divider(),
+        const Divider(),
         SafeArea(
           child: Container(
-            decoration: const BoxDecoration(color: Colors.white, boxShadow: [
-              BoxShadow(
-                  color: Colors.grey,
-                  blurRadius: 5,
-                  spreadRadius: 0.1,
-                  offset: Offset(0, 0))
-            ]),
             padding: const EdgeInsets.all(10),
+            // color: Colors.white,
             height: 50,
             child: Row(
               children: [
@@ -182,15 +169,15 @@ class _MessagePageState extends State<MessagePage> {
       id: text.hashCode.toString(),
       message: text,
       uid: authProvider.user!.uid,
+      // animationController: _controller,
     );
 
     socketService.emit('direct-message', {
       "of": authProvider.user!.uid,
-      "to": authProvider.friend!.uid,
+      "to": '624cec81714ee6200250e87c',
       "message": text
     });
-
-    loadHistory(authProvider.friend!.uid);
+    // message.animationController.forward();
 
     messageProvider.userMessages.insert(0, message);
 

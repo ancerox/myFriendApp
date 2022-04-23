@@ -10,4 +10,6 @@ abstract class ChatRepository {
   Future<Either<Failure, List<Message>>> getMessages(String userId);
   Future<Either<Failure, User>> getNewUser(creds);
   Future<Either<Failure, bool>> deleteFriend(String uid);
+  Future<Either<Failure, bool>> deleteMessage(String messageId);
+  Future<Either<Failure, bool>> reportMsg(String messageId);
 }

@@ -3,8 +3,10 @@ import 'package:get_it/get_it.dart';
 import 'package:my_friend/src/features/chat/data/datasource/login_remote_data_source.dart';
 import 'package:my_friend/src/features/chat/data/repository/login_repository_impl.dart';
 import 'package:my_friend/src/features/chat/domain/usecase/delete_friend.dart';
+import 'package:my_friend/src/features/chat/domain/usecase/delete_message.dart';
 import 'package:my_friend/src/features/chat/domain/usecase/get_messages.dart';
 import 'package:my_friend/src/features/chat/domain/usecase/get_new_user.dart';
+import 'package:my_friend/src/features/chat/domain/usecase/report_msg.dart';
 import 'package:my_friend/src/features/chat/domain/usecase/token_verification_usecase.dart';
 
 import 'src/features/chat/domain/repository/login_repository.dart';
@@ -22,7 +24,11 @@ void init() {
       tokenVerificationUsecase: locator(),
       newUserUseCase: locator()));
   locator.registerFactory(
-    () => MessageProvider(locator()),
+    () => MessageProvider(
+      reportMsgUseCase: locator(),
+      deleteMessageUsecase: locator(),
+      getMessagesUseCase: locator(),
+    ),
   );
 
 // UseCases
@@ -31,6 +37,8 @@ void init() {
   locator.registerLazySingleton(() => GetMessagues(locator()));
   locator.registerLazySingleton(() => GetNewUser(locator()));
   locator.registerLazySingleton(() => DeleteFriend(locator()));
+  locator.registerLazySingleton(() => DeleteMessage(locator()));
+  locator.registerLazySingleton(() => ReportMsg(locator()));
 
 // repository
   locator.registerLazySingleton<ChatRepository>(

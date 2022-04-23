@@ -12,7 +12,7 @@ import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class RegisterPage extends StatefulWidget {
-  RegisterPage({Key? key}) : super(key: key);
+  const RegisterPage({Key? key}) : super(key: key);
 
   @override
   State<RegisterPage> createState() => _RegisterPageState();
@@ -104,7 +104,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   ),
                   RichText(
                       text: TextSpan(children: [
-                    TextSpan(
+                    const TextSpan(
                         style: TextStyle(color: Colors.black),
                         text: 'By creating this account i agree EULA terms \n'),
                     TextSpan(

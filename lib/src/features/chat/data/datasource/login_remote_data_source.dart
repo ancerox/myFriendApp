@@ -18,6 +18,8 @@ abstract class AuthRemoteDataSource {
   Future<List<MessageResponse>> getMessages(String userid);
   Future<UserResponse> getNewUser(NewUserParams newUserParams);
   Future<bool> deleteFriend(String uid);
+  Future<bool> deleteMessage(String messageId);
+  Future<bool> reportMessage(String messageId);
 }
 
 class AuthRemoteDataSourceIMPL extends AuthRemoteDataSource {
@@ -66,11 +68,11 @@ class AuthRemoteDataSourceIMPL extends AuthRemoteDataSource {
   }
 
   @override
-  Future<List<MessageResponse>> getMessages(String userId) async {
+  Future<List<MessageResponse>> getMessages(String userid) async {
     final token = await storage.read(key: 'token');
 
     final resp = await dioClient.get(
-        'https://my-friend-ancerox.herokuapp.com/api/messages/$userId',
+        'https://my-friend-ancerox.herokuapp.com/api/messages$userid',
         options: Options(
           headers: {"x-token": token},
           contentType: 'application/json',
@@ -112,6 +114,36 @@ class AuthRemoteDataSourceIMPL extends AuthRemoteDataSource {
       options: Options(headers: {"x-token": token}),
     );
 
+    if (resp.data['ok']) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  @override
+  Future<bool> deleteMessage(String messageId) async {
+    final token = await storage.read(key: 'token');
+
+    final resp = await dioClient.get(
+      'https://my-friend-ancerox.herokuapp.com/api/deletemessage$messageId',
+      options: Options(headers: {"x-token": token}),
+    );
+    if (resp.data['ok']) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  @override
+  Future<bool> reportMessage(String messageId) async {
+    final token = await storage.read(key: 'token');
+
+    final resp = await dioClient.get(
+      'https://my-friend-ancerox.herokuapp.com/api/reportMessage$messageId',
+      options: Options(headers: {"x-token": token}),
+    );
     if (resp.data['ok']) {
       return true;
     } else {

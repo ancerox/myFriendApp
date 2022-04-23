@@ -14,7 +14,6 @@ enum ServerStatus { online, offline, connecting }
 class SocketService with ChangeNotifier {
   ServerStatus _serverStatus = ServerStatus.connecting;
   late IO.Socket _socket;
-  // List friendsList = [];
 
   ServerStatus get serverStatus => _serverStatus;
 

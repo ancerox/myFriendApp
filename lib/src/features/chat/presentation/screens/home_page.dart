@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:my_friend/src/config/helpers/alerts.dart';
-import 'package:my_friend/src/config/utils/constants.dart';
-import 'package:my_friend/src/config/utils/friends_service.dart';
 import 'package:my_friend/src/config/utils/socket_conection.dart';
 import 'package:my_friend/src/features/chat/domain/entities/user.dart';
 import 'package:my_friend/src/features/chat/presentation/components/add_friend_alert.dart';
@@ -22,6 +20,7 @@ List<User> friends = [];
 
 late SocketService socketprovider;
 TextEditingController addFriendsController = TextEditingController();
+TextEditingController contactUsEditingCtrl = TextEditingController();
 
 class _HomePageState extends State<HomePage> {
   @override
@@ -47,7 +46,7 @@ class _HomePageState extends State<HomePage> {
               leading: IconButton(
                   onPressed: () {
                     Navigator.pushReplacementNamed(context, '/login');
-                    socketprovider.disconnect();
+                    socketprovider.socket.off('disconnect');
                     provider.logUserOut();
                   },
                   icon: const Icon(Icons.logout_rounded),
@@ -64,13 +63,25 @@ class _HomePageState extends State<HomePage> {
             ),
             body: snapshot.data != null
                 ? userListView(snapshot.data, streamBldContext)
-                : Center(child: CircularProgressIndicator()),
-            floatingActionButton: FloatingActionButton(
-                backgroundColor: Colors.purple[200],
-                child: const Icon(Icons.add),
-                onPressed: () {
-                  addFriend(streamBldContext, addFriendsController);
-                }),
+                : const Center(child: CircularProgressIndicator()),
+            floatingActionButton: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Container(
+                    margin: const EdgeInsets.symmetric(horizontal: 20),
+                    child: TextButton(
+                        onPressed: () {
+                          Navigator.pushNamed(streamBldContext, '/contactus');
+                        },
+                        child: const Text('Contact US'))),
+                FloatingActionButton(
+                    backgroundColor: Colors.purple[200],
+                    child: const Icon(Icons.add),
+                    onPressed: () {
+                      addFriend(streamBldContext, addFriendsController);
+                    }),
+              ],
+            ),
           );
         });
   }
@@ -87,13 +98,15 @@ class _HomePageState extends State<HomePage> {
             itemBuilder: (context, i) {
               final friend = snapshot[i];
 
-              return GestureDetector(
+              return InkWell(
                 onTap: () {
                   final provider =
                       Provider.of<AuthProvider>(context, listen: false);
-
-                  Navigator.pushNamed(context, '/chat', arguments: friend);
                   provider.friend = friend;
+                  Navigator.pushNamed(
+                    context,
+                    '/chat',
+                  );
                 },
                 child: Container(
                   margin: EdgeInsets.symmetric(vertical: 10),
@@ -120,7 +133,7 @@ class _HomePageState extends State<HomePage> {
                             if (isFriendRemoved) {
                               showCustomAlert(
                                   contextt,
-                                  'Friend has been delete',
+                                  'Friend has been removed',
                                   'You just remove ${friend.name} of your friend list');
                             } else {
                               showCustomAlert(
@@ -130,18 +143,37 @@ class _HomePageState extends State<HomePage> {
                             }
                             setState(() {});
                           },
-                          backgroundColor: Color(0xFFFE4A49),
+                          backgroundColor: Color.fromARGB(255, 0, 0, 0),
+                          foregroundColor: Colors.white,
+                          icon: Icons.delete_forever_rounded,
+                          label: 'Remove',
+                        ),
+                        SlidableAction(
+                          onPressed: (context) async {
+                            final provider = Provider.of<AuthProvider>(context,
+                                listen: false);
+
+                            final isFriendRemoved =
+                                await provider.deleteFriend(friend.uid);
+
+                            if (isFriendRemoved) {
+                              showCustomAlert(
+                                  contextt,
+                                  'This person has been blocked',
+                                  'You just blocked ${friend.name} of your friend list');
+                            } else {
+                              showCustomAlert(
+                                  contextt,
+                                  'Theres been an error on the server',
+                                  'Pleae try again');
+                            }
+                            setState(() {});
+                          },
+                          backgroundColor: Colors.red,
                           foregroundColor: Colors.white,
                           icon: Icons.block,
-                          label: 'Block/Delete',
+                          label: 'Block',
                         ),
-                        // SlidableAction(
-                        //   onPressed: (context) async {},
-                        //   backgroundColor: Colors.black,
-                        //   foregroundColor: Colors.white,
-                        //   icon: Icons.block,
-                        //   label: 'Block',
-                        // ),
                       ],
                     ),
                     key: Key(friend.uid),
@@ -150,7 +182,10 @@ class _HomePageState extends State<HomePage> {
                       leading: CircleAvatar(
                         maxRadius: 35.0,
                         backgroundColor: Colors.purple[200],
-                        child: Text(friend.name.substring(0, 2),
+                        child: Text(
+                            friend.name.length > 2
+                                ? friend.name.substring(0, 2)
+                                : "GG",
                             style: const TextStyle(color: Colors.white)),
                       ),
                       title: Text(friend.name),
@@ -169,7 +204,6 @@ class _HomePageState extends State<HomePage> {
   @override
   void dispose() {
     socketprovider.dispose();
-    // socketprovider.socket.off('disconnect');
     super.dispose();
   }
 }

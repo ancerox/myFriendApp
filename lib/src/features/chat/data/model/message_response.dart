@@ -29,30 +29,33 @@ class Messages {
 
 class MessageResponse extends Message {
   MessageResponse({
+    required this.id,
     required this.of,
     required this.to,
     required this.message,
     required this.createdAt,
     required this.updatedAt,
   }) : super(
-          createdAt: createdAt,
-          updatedAt: updatedAt,
-          to: to,
-          of: of,
-          message: message,
-        );
+            createdAt: createdAt,
+            updatedAt: updatedAt,
+            to: to,
+            of: of,
+            message: message,
+            id: id);
 
   String of;
   String to;
   String message;
   DateTime createdAt;
   DateTime updatedAt;
+  String id;
 
   factory MessageResponse.fromJson(Map<String, dynamic> json) =>
       MessageResponse(
         of: json["of"],
         to: json["to"],
         message: json["message"],
+        id: json['_id'],
         createdAt: DateTime.parse(json["createdAt"]),
         updatedAt: DateTime.parse(json["updatedAt"]),
       );
